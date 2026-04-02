@@ -20,3 +20,29 @@ tasks:
     cmds:
     - task --list
     silent: true
+
+  build:
+    desc: Build Firecracker image in current directory
+    dir: '{{.USER_WORKING_DIR}}'
+    preconditions:
+      - test -f build.sh
+    silent: true
+    cmds:
+    - pwd
+    - "[ -d output ] || mkdir output"
+    - chmod +x build.sh
+    - ./build.sh
+
+  test:
+    desc: Test Firecracker image in current directory
+    dir: '{{.USER_WORKING_DIR}}'
+    preconditions:
+      - test -f config.json
+    silent: true
+    cmds:
+    # TODO: create Overlay FS
+    # TODO: create TAP
+    - firecracker --no-api --config-file config.json
+    # TODO: delete TAP
+    # TODO: delete Overlay FS
+  
