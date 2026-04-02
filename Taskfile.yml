@@ -1,0 +1,22 @@
+version: '3'
+
+env:
+  PUID:
+    sh: id -u
+  PGID:
+    sh: id -g
+  
+dotenv: ['.env']
+  
+tasks:
+  hello:
+    desc: Hello world task
+    cmds:
+      - echo 'Hello World from Task!'
+    silent: true
+
+  list:
+    desc: List all tasks
+    cmds:
+    - task --list
+    silent: true
