@@ -34,15 +34,10 @@ tasks:
     - ./build.sh
 
   test:
-    desc: Test Firecracker image in current directory
+    desc: Test Firecracker image in current directory (no persistence/network)
     dir: '{{.USER_WORKING_DIR}}'
     preconditions:
       - test -f config.json
     silent: true
     cmds:
-    # TODO: create Overlay FS
-    # TODO: create TAP
     - firecracker --no-api --config-file config.json
-    # TODO: delete TAP
-    # TODO: delete Overlay FS
-  

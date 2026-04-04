@@ -21,8 +21,18 @@ RUN rc-update add devfs boot \
     && rc-update add sysfs boot \
     && rc-update add local default
 
-
 # The /root directory will contain a script that copies
 # files from the mounted docker volume into the mounted
 # EXT4 file
 COPY root /root
+
+COPY interfaces /etc/network/interfaces
+
+# setup ssh and dhcp
+RUN apk add \
+        openssh-server \
+        dhcpcd \
+    && rc-update add dhcpcd \
+    && rc-update add sshd \
+    && echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config \
+    && echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
