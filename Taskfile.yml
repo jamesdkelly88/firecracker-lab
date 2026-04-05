@@ -44,23 +44,23 @@ tasks:
     requires:
       vars: [ IMAGE, VERSION ]
     cmds:
-    - sed -i "s:output/.*\.ext4:output/{{ .IMAGE }}-{{ .VERSION }}.ext4:g" config.json
+    - sed -i "s:output/.*\.img:output/{{ .IMAGE }}-{{ .VERSION }}.img:g" config.json
     - firecracker --no-api --config-file config.json
 
   deploy:
-    desc: Deploy Firecracker image to server
+    desc: Deploy Firecracker squashfs image to server
     dir: rootfs/output
     silent: true
     requires:
       vars: [ IMAGE, VERSION ]
     preconditions:
-      - test -f {{ .IMAGE }}-{{ .VERSION }}.ext4
+      - test -f {{ .IMAGE }}-{{ .VERSION }}.img
     cmds:
     - sudo umount /mnt/firecracker || true
     - sudo rm -rf /mnt/firecracker
     - sudo mkdir -p /mnt/firecracker
     - sudo mount -t cifs -o guest //vm38/rootfs /mnt/firecracker
-    - sudo cp -f {{ .IMAGE }}-{{ .VERSION }}.ext4 /mnt/firecracker/
+    - sudo cp -f {{ .IMAGE }}-{{ .VERSION }}.img /mnt/firecracker/
 
   b-t:
     desc: Build and test Firecracker image

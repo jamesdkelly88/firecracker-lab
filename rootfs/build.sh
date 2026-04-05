@@ -3,6 +3,7 @@
 set -eu
 IMAGE_NAME=$1-$2
 ROOTFS_FILE=output/$IMAGE_NAME.ext4
+SQUASHFS_FILE=output/$IMAGE_NAME.img
 ROOTFS_DIR=/tmp/rootfs
 DOCKER_FILE=$1.dockerfile
 DOCKER_TAG=$2
@@ -33,6 +34,15 @@ docker build --tag $DOCKER_IMAGE -f $DOCKER_FILE --build-arg "VERSION_TAG=$DOCKE
 
 # Run container
 docker run -it --rm -v $TEMP_DIRECTORY:$ROOTFS_DIR $DOCKER_IMAGE sh copy-to-rootfs $ROOTFS_DIR
+
+# Create necessary folders for overlayFS
+sudo mkdir -p $TEMP_DIRECTORY/overlay/root $TEMP_DIRECTORY/overlay/work $TEMP_DIRECTORY/mnt $TEMP_DIRECTORY/rom
+
+# Copy over the overlay-init script
+sudo cp overlay-init $TEMP_DIRECTORY/sbin/overlay-init
+
+# Create a SquashFS out of the old rootfs
+sudo mksquashfs $TEMP_DIRECTORY $SQUASHFS_FILE -noappend
 
 # unmount image
 sudo umount $TEMP_DIRECTORY

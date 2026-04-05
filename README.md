@@ -58,21 +58,21 @@ flowchart TD
 - [x] Install dhcp
 - [x] Create terraform module to deploy MicroVM as files and services (neuspaces/system)
 - [x] Create terraform user `terraform` with passwordless sudo
-- [ ] File share (`smb`) on hypervisor to allow image upload
+- [x] File share (`smb`) on hypervisor to allow image upload
 - [x] Test multiple concurrent VMs with a serial console each
 - [x] Include example files in documentation
-- [ ] Include diagram in documentation
+- [x] Include diagram in documentation
 - [ ] Include example commands in documentation
-- [ ] Kernel option `no pci`?
+- [x] Kernel option `no pci`?
 - [ ] 3rd NIC for VM to simulate domain bridge
 - [x] Create [Alpine image](https://hans-pistor.tech/posts/building-a-rootfs-for-firecracker/)
-- [ ] Add network interface and dhcp to Alpine image
-- [ ] Pin Alpine image to version (cli arg -> Docker tag)
-- [ ] Restructure repo to have 1 folder for rootfs build with multiple Dockerfiles
-- [ ] Update `build` task to accept Dockerfile and version arguments
+- [x] Add network interface and dhcp to Alpine image
+- [x] Pin Alpine image to version (cli arg -> Docker tag)
+- [x] Restructure repo to have 1 folder for rootfs build with multiple Dockerfiles
+- [x] Update `build` task to accept Dockerfile and version arguments
 - [ ] Create [Ubuntu image](https://github.com/firecracker-microvm/firecracker/blob/main/tools/functions) in same folder using the same scripts
 - [ ] Check if Terraform can get platform slug from netbox - use as filename
-- [ ] Add [OverlayFS](https://e2b.dev/blog/scaling-firecracker-using-overlayfs-to-save-disk-space) to Alpine image
+- [x] Add [OverlayFS](https://e2b.dev/blog/scaling-firecracker-using-overlayfs-to-save-disk-space) to Alpine image
 - [ ] Update Terraform module for RO squashfs and creation of RW overlay
 - [ ] Add OverlayFS to Ubuntu image
 - [ ] Create Debian image
@@ -152,15 +152,48 @@ sudo iptables-save | sudo tee /etc/iptables/rules.v4
 
 ### Building a Filesystem
 
-[Alpine]
+Run the build task:
+```sh
+task build IMAGE=alpine VERSION=3.23
+```
 
-TODO: 
-- read-only with overlay
-- dhcp on eth0
+This will create `output/alpine-3.23.ext4` (filesystem for RW use) and `output/alpine-3.23.img` (squashfs for RO overlay use)
 
 ### Testing a Filesystem
 
-TBC
+Run the test task:
+```sh
+task test IMAGE=alpine VERSION=3.23
+```
+
+This will run a VM locally with the squashfs image and an overlay filesystem in RAM (no persistence).
+
+To persist between reboots:
+- update `config.json`
+  - Console arguments: change `overlay_root=ram` to `overlay_root=vdb`
+  - Add definition of 2nd disk to `drives`:
+```json
+{
+  "drive_id": "overlayfs",
+  "path_on_host": "output/overlay.ext4",
+  "is_root_device": false,
+  "partuuid": null,
+  "is_read_only": false,
+  "cache_type": "Unsafe",
+  "rate_limiter": null
+}
+```
+  - create `overlay.ext4` file:
+```sh
+dd if=/dev/zero of=rootfs/output/overlay.ext4 conv=sparse bs=1M count=1024
+mkfs.ext4 rootfs/output/overlay.ext4
+```
+
+To use a writeable filesystem:
+
+- update `config.json` root drive
+  - Change `.img` to `.ext4` on `path_on_host`
+  - Change `read_only` to false
 
 ### Running a VM
 
