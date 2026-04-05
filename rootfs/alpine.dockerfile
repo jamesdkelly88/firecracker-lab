@@ -1,4 +1,6 @@
-FROM alpine
+ARG VERSION_TAG=latest
+
+FROM alpine:${VERSION_TAG}
 
 WORKDIR /root
 

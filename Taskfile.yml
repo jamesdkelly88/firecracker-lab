@@ -22,22 +22,86 @@ tasks:
     silent: true
 
   build:
-    desc: Build Firecracker image in current directory
-    dir: '{{.USER_WORKING_DIR}}'
+    desc: Build Firecracker rootfs image
+    dir: rootfs
     preconditions:
       - test -f build.sh
     silent: true
+    requires:
+      vars: [ IMAGE, VERSION ]
     cmds:
     - pwd
     - "[ -d output ] || mkdir output"
     - chmod +x build.sh
-    - ./build.sh
+    - "./build.sh {{ .IMAGE }} {{ .VERSION }}"
 
   test:
-    desc: Test Firecracker image in current directory (no persistence/network)
-    dir: '{{.USER_WORKING_DIR}}'
+    desc: Test Firecracker image (no persistence/network)
+    dir: rootfs
     preconditions:
       - test -f config.json
     silent: true
+    requires:
+      vars: [ IMAGE, VERSION ]
     cmds:
+    - sed -i "s:output/.*\.ext4:output/{{ .IMAGE }}-{{ .VERSION }}.ext4:g" config.json
     - firecracker --no-api --config-file config.json
+
+  deploy:
+    desc: Deploy Firecracker image to server
+    dir: rootfs/output
+    silent: true
+    requires:
+      vars: [ IMAGE, VERSION ]
+    preconditions:
+      - test -f {{ .IMAGE }}-{{ .VERSION }}.ext4
+    cmds:
+    - sudo umount /mnt/firecracker || true
+    - sudo rm -rf /mnt/firecracker
+    - sudo mkdir -p /mnt/firecracker
+    - sudo mount -t cifs -o guest //vm38/rootfs /mnt/firecracker
+    - sudo cp -f {{ .IMAGE }}-{{ .VERSION }}.ext4 /mnt/firecracker/
+
+  b-t:
+    desc: Build and test Firecracker image
+    aliases:
+      - build-test
+      - bt
+    silent: true
+    requires:
+      vars: [ IMAGE, VERSION ]
+    cmds:
+    - task: build
+      vars: { IMAGE: '{{ .IMAGE }}', VERSION: '{{ .VERSION }}' }
+    - task: test
+      vars: { IMAGE: '{{ .IMAGE }}', VERSION: '{{ .VERSION }}' }
+
+  b-t-d:
+    desc: Build, test and deploy Firecracker image
+    aliases:
+      - build-test-deploy
+      - btd
+    silent: true
+    requires:
+      vars: [ IMAGE, VERSION ]
+    cmds:
+    - task: build
+      vars: { IMAGE: '{{ .IMAGE }}', VERSION: '{{ .VERSION }}' }
+    - task: test
+      vars: { IMAGE: '{{ .IMAGE }}', VERSION: '{{ .VERSION }}' }
+    - task: deploy
+      vars: { IMAGE: '{{ .IMAGE }}', VERSION: '{{ .VERSION }}' }
+
+  b-d:
+    aliases:
+      - build-deploy
+      - bd
+    desc: Build and deploy Firecracker image
+    silent: true
+    requires:
+      vars: [ IMAGE, VERSION ]
+    cmds:
+    - task: build
+      vars: { IMAGE: '{{ .IMAGE }}', VERSION: '{{ .VERSION }}' }
+    - task: deploy
+      vars: { IMAGE: '{{ .IMAGE }}', VERSION: '{{ .VERSION }}' }
