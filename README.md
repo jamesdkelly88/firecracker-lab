@@ -71,9 +71,9 @@ flowchart TD
 - [x] Restructure repo to have 1 folder for rootfs build with multiple Dockerfiles
 - [x] Update `build` task to accept Dockerfile and version arguments
 - [ ] Create [Ubuntu image](https://github.com/firecracker-microvm/firecracker/blob/main/tools/functions) in same folder using the same scripts
-- [ ] Check if Terraform can get platform slug from netbox - use as filename
+- [x] Check if Terraform can get platform slug from netbox - use as filename
 - [x] Add [OverlayFS](https://e2b.dev/blog/scaling-firecracker-using-overlayfs-to-save-disk-space) to Alpine image
-- [ ] Update Terraform module for RO squashfs and creation of RW overlay
+- [x] Update Terraform module for RO squashfs and creation of RW overlay
 - [ ] Add OverlayFS to Ubuntu image
 - [ ] Create Debian image
 - [ ] Create Fedora/Rocky image
