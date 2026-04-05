@@ -5,7 +5,7 @@ then
     exit 1
 fi
 echo "Copying rootfs directories to $ROOT_DIR"
-for d in bin etc lib root sbin usr; do tar c "/$d" | tar x -C $ROOT_DIR; done
+for d in bin etc home lib root sbin usr; do tar c "/$d" | tar x -C $ROOT_DIR; done
 
 # The above command may trigger the following message:
 # tar: Removing leading "/" from member names

@@ -28,9 +28,9 @@ RUN rc-update add devfs boot \
 # EXT4 file
 COPY root /root
 
+# setup ssh and dhcp
 COPY interfaces /etc/network/interfaces
 
-# setup ssh and dhcp
 RUN apk add \
         openssh-server \
         dhcpcd \
@@ -38,3 +38,14 @@ RUN apk add \
     && rc-update add sshd \
     && echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config \
     && echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+
+# ansible
+RUN apk add \
+        python3 \
+        sudo \
+    && adduser ansible -D \
+    && addgroup ansible wheel \
+    && echo "ansible:ansible" | chpasswd
+
+COPY wheel /etc/sudoers.d/wheel
+
