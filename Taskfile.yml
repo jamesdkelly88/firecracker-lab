@@ -59,7 +59,7 @@ tasks:
     - sudo umount /mnt/firecracker || true
     - sudo rm -rf /mnt/firecracker
     - sudo mkdir -p /mnt/firecracker
-    - sudo mount -t cifs -o guest //vm38/rootfs /mnt/firecracker
+    - sudo mount -t cifs -o guest //firecracker/rootfs /mnt/firecracker
     - sudo cp -f {{ .IMAGE }}-{{ .VERSION }}.img /mnt/firecracker/
 
   b-t:
