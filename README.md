@@ -64,24 +64,24 @@ flowchart TD
 - [x] Include diagram in documentation
 - [ ] Include example commands in documentation
 - [x] Kernel option `no pci`?
-- [ ] 3rd NIC for VM to simulate domain bridge
+- [x] 3rd NIC for VM to simulate domain bridge
 - [x] Create [Alpine image](https://hans-pistor.tech/posts/building-a-rootfs-for-firecracker/)
 - [x] Add network interface and dhcp to Alpine image
 - [x] Pin Alpine image to version (cli arg -> Docker tag)
 - [x] Restructure repo to have 1 folder for rootfs build with multiple Dockerfiles
 - [x] Update `build` task to accept Dockerfile and version arguments
-- [ ] Create [Ubuntu image](https://github.com/firecracker-microvm/firecracker/blob/main/tools/functions) in same folder using the same scripts
+- [x] Create [Ubuntu image](https://github.com/firecracker-microvm/firecracker/blob/main/tools/functions) in same folder using the same scripts
 - [x] Check if Terraform can get platform slug from netbox - use as filename
 - [x] Add [OverlayFS](https://e2b.dev/blog/scaling-firecracker-using-overlayfs-to-save-disk-space) to Alpine image
 - [x] Update Terraform module for RO squashfs and creation of RW overlay
-- [ ] Add OverlayFS to Ubuntu image
-- [ ] Create Debian image
+- [x] Add OverlayFS to Ubuntu image
+- [x] Create Debian image
 - [ ] Create Fedora/Rocky image
-- [ ] Concurrent VM test - ansible patching run
+- [x] Concurrent VM test - ansible patching run
 - [ ] Shell script to automate download/update of CI kernels
 - [ ] Autobase cluster test
 - [ ] FreeBSD VM to create kernel and rootfs images
-- [ ] Deploy to bare metal
+- [x] Deploy to bare metal
 - [ ] Add support to `start`/`stop` ansible roles
 - [ ] Test additional disks
 - [ ] Test additional NICs
@@ -310,3 +310,20 @@ iface eth0 inet dhcp
 - No DHCP in hello world image - need to set IP manually
 - `eth0` has to be started manually even after updating `/etc/network/interfaces` - this could be DHCP related, TODO: try static config
 - MicroVM can ping router, and laptop can ping MicroVM, but MicroVM cannot access the internet. No SSH installed so can't test inbound connection
+
+### Notes
+
+#### Rocky Package List
+
+```sh
+RUN dnf -y update && \
+    dnf -y install \
+        systemd \
+        iproute \
+        iputils \
+        sudo \
+        vim \
+        curl \
+        which \
+    && dnf clean all
+```
