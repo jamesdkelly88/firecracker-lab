@@ -111,25 +111,30 @@ tasks:
     silent: true
     requires:
       vars: [ VERSION ]
+    vars:
+      RELEASE:
+        sh: gh api 'repos/siderolabs/talos/releases?per_page=100' --jq '[ .[] | select(.prerelease or .draft | not) | .tag_name[1:100] | select(contains("-") | not) | select(startswith("{{ .VERSION }}")) ] | .[0]'
     cmds:
-    # TODO: get latest patch for minor version given
-    - mkdir -p rootfs/output
-    - echo "Downloading initramfs"
-    - curl -o  rootfs/output/talos-{{ .VERSION }}.xz -L https://github.com/siderolabs/talos/releases/download/v{{ .VERSION }}/initramfs-amd64.xz
-    - mkdir -p kernel
-    - echo "Downloading compressed kernel"
-    - curl -o  kernel/vmlinuz-talos-{{ .VERSION }}.bin -L https://github.com/siderolabs/talos/releases/download/v{{ .VERSION }}/vmlinuz-amd64
-    - echo "Uncompressing kernel"
-    - extract-vmlinux kernel/vmlinuz-talos-{{ .VERSION }}.bin > kernel/vmlinux-talos-{{ .VERSION }}.bin
+    - echo "Using version {{ .RELEASE }}"
+    - rm -rf talos
+    - echo "Cloning Talos source code"
+    - git clone --depth=1 -b v{{ .RELEASE }} https://github.com/siderolabs/talos.git && echo "cloned"
+    - | 
+        cd talos
+        pwd
+        echo "Building Talos"
+        make initramfs kernel
+        extract-vmlinux _out/vmlinuz-amd64 > _out/vmlinux-amd64
     - echo "Deploying initramfs to server"
     - sudo umount /mnt/firecracker || true
     - sudo rm -rf /mnt/firecracker
     - sudo mkdir -p /mnt/firecracker
     - sudo mount -t cifs -o guest //firecracker/rootfs /mnt/firecracker
-    - sudo cp -f rootfs/output/talos-{{ .VERSION }}.xz /mnt/firecracker/
+    - sudo cp -f talos/_out/initramfs-amd64.xz /mnt/firecracker/talos-{{ .VERSION }}.xz
     - sudo umount /mnt/firecracker || true
     - echo "Deploying kernel to server"
     - sudo mount -t cifs -o guest //firecracker/kernel /mnt/firecracker
-    - sudo cp -f kernel/vmlinux-talos-{{ .VERSION }}.bin /mnt/firecracker/
+    - sudo cp -f talos/_out/vmlinux-amd64 /mnt/firecracker/vmlinux-talos-{{ .VERSION }}.bin
     - sudo umount /mnt/firecracker || true
+
 

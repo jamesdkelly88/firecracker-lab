@@ -7,3 +7,6 @@ vmlinux.bin
 # filesystems
 *.ext4
 *.img
+
+# temporary repos
+talos/
