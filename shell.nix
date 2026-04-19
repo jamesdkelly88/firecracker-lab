@@ -2,6 +2,7 @@
   packages = with pkgs; [
     firecracker
     go-task
+    linux-scripts
     squashfsTools
   ];
 }
